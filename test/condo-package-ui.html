@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Condo Package Management – UI Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --bg-alt: #ffffff;
+      --primary: #1f4f8b;
+      --primary-soft: #e5edf7;
+      --accent: #10b981;
+      --accent-soft: #ecfdf5;
+      --danger: #ef4444;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top left, #e0edff, #f9fafb 55%);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    /* Generic Layout */
+
+    .app-shell {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--bg-alt);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      padding: 24px 28px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      gap: 6px;
+      transition: 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #173a65;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+    }
+
+    .btn-outline:hover {
+      background: #f3f4f6;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+
+    .btn-small {
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      border-radius: var(--radius-sm);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .badge-green {
+      background: var(--accent-soft);
+      color: #047857;
+    }
+
+    .badge-gray {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .badge-red {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    h1, h2, h3 {
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+    }
+
+    p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      padding: 9px 10px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: 0.12s ease;
+      background: #f9fafb;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.15);
+      background: white;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    th {
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: #6b7280;
+      text-transform: uppercase;
+    }
+
+    tr:hover td {
+      background: #f9fafb;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    /* LOGIN SCREEN */
+
+    .login-wrap {
+      max-width: 420px;
+      width: 100%;
+      margin: auto;
+    }
+
+    .login-title {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .login-title h1 {
+      margin-bottom: 4px;
+    }
+
+    .role-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .role-buttons .btn {
+      flex: 1 1 30%;
+      min-width: 0;
+    }
+
+    /* MAIN APP LAYOUT */
+
+    .layout {
+      display: grid;
+      grid-template-columns: 230px minmax(0, 1fr);
+      gap: 18px;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .sidebar {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      padding: 18px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      backdrop-filter: blur(8px);
+    }
+
+    .side-top h2 {
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+
+    .side-top small {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .nav-group {
+      margin-top: 18px;
+    }
+
+    .nav-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .nav-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border-radius: var(--radius-md);
+      padding: 8px 10px;
+      margin-bottom: 4px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #374151;
+      transition: 0.15s ease;
+    }
+
+    .nav-btn:hover {
+      background: #e5e7eb;
+    }
+
+    .nav-btn.active {
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .side-bottom {
+      margin-top: 18px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* TOP BAR */
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .topbar-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .topbar-main h1 {
+      font-size: 1.3rem;
+    }
+
+    .topbar-main span {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #1f4f8b, #10b981);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* DASHBOARD CONTENT */
+
+    .content-card {
+      background: var(--bg-alt);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      padding: 18px 20px;
+      margin-bottom: 18px;
+    }
+
+    .flex-row {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      flex: 1 1 120px;
+      min-width: 120px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background: #f9fafb;
+      border: 1px solid var(--border);
+    }
+
+    .stat-card span {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .stat-card strong {
+      font-size: 1.3rem;
+    }
+
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filters select, .filters input {
+      max-width: 160px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .info-block {
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+    }
+
+    .info-block h3 {
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .info-label {
+      color: var(--text-muted);
+    }
+
+    .info-value {
+      font-weight: 500;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .sidebar {
+        order: -1;
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 12px;
+      }
+      .side-top, .side-bottom {
+        border: none;
+      }
+      .side-top small {
+        display: none;
+      }
+      .nav-group {
+        margin-top: 0;
+      }
+      .nav-label {
+        display: none;
+      }
+      .nav-btn {
+        white-space: nowrap;
+      }
+      .side-bottom {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="screen-login" class="app-shell screen active">
+  <div class="login-wrap">
+    <div class="card">
+      <div class="login-title">
+        <h1>Condo Package System</h1>
+        <p>Demo UI — choose a role to preview screens.</p>
+      </div>
+
+      <div class="field">
+        <label>Username</label>
+        <input type="text" placeholder="demo" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" placeholder="••••••••" />
+      </div>
+
+      <button class="btn btn-primary" style="width:100%; margin-top:6px;" disabled>
+        Login (demo only)
+      </button>
+
+      <p style="margin-top:16px; margin-bottom:6px; font-size:0.85rem;">
+        For this prototype, pick a role to see the layouts:
+      </p>
+      <div class="role-buttons">
+        <button class="btn btn-outline" data-demo-role="officer">Officer</button>
+        <button class="btn btn-outline" data-demo-role="tenant">Tenant</button>
+        <button class="btn btn-outline" data-demo-role="admin">Admin</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OFFICER LAYOUT -->
+<div id="screen-officer" class="app-shell screen">
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="side-top">
+        <h2>Officer Panel</h2>
+        <small>Condo Package System</small>
+
+        <div class="nav-group">
+          <div class="nav-label">Navigation</div>
+          <button class="nav-btn active" data-target="officer-dashboard">Dashboard</button>
+          <button class="nav-btn" data-target="officer-packages">Package List</button>
+          <button class="nav-btn" data-target="officer-add">Add Package</button>
+        </div>
+      </div>
+      <div class="side-bottom">
+        <span>Logged in as <strong>Mint</strong></span>
+        <button class="btn btn-outline btn-small" id="btn-back-login-1">Back to login</button>
+      </div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="topbar-main">
+          <h1 id="officer-view-title">Dashboard</h1>
+          <span>Condo B · Ground Floor Reception</span>
+        </div>
+        <div class="topbar-right">
+          <span>Officer Mint</span>
+          <div class="avatar">M</div>
+        </div>
+      </div>
+
+      <!-- Officer dashboard -->
+      <section id="officer-dashboard" class="screen active">
+        <div class="content-card">
+          <div class="flex-row">
+            <div class="stat-card">
+              <span>At Condo</span>
+              <strong>12</strong>
+            </div>
+            <div class="stat-card">
+              <span>Picked Up Today</span>
+              <strong>5</strong>
+            </div>
+            <div class="stat-card">
+              <span>Returned This Week</span>
+              <strong>1</strong>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;">
+            <button class="btn btn-primary" data-target="officer-add">
+              + Add New Package
+            </button>
+          </div>
+        </div>
+
+        <div class="content-card">
+          <div class="content-header">
+            <h2>Today&rsquo;s Packages</h2>
+            <div class="filters">
+              <select>
+                <option>All statuses</option>
+                <option selected>At Condo</option>
+                <option>Picked Up</option>
+                <option>Returned</option>
+              </select>
+              <input type="text" placeholder="Search tracking or tenant" />
+            </div>
+          </div>
+          <table>
+            <thead>
+            <tr>
+              <th>Tracking No.</th>
+              <th>Tenant</th>
+              <th>Unit</th>
+              <th>Status</th>
+              <th>Arrival</th>
+              <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>TH123456789</td>
+              <td>Somchai</td>
+              <td>B1205</td>
+              <td><span class="badge badge-green">At Condo</span></td>
+              <td>10:45</td>
+              <td><button class="btn btn-outline btn-small" data-target="officer-detail">View</button></td>
+            </tr>
+            <tr>
+              <td>AA112233445</td>
+              <td>Alice</td>
+              <td>A903</td>
+              <td><span class="badge badge-green">At Condo</span></td>
+              <td>09:30</td>
+              <td><button class="btn btn-outline btn-small" data-target="officer-detail">View</button></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Officer package list -->
+      <section id="officer-packages" class="screen">
+        <div class="content-card">
+          <div class="content-header">
+            <h2>Package List</h2>
+            <div class="filters">
+              <select>
+                <option>All statuses</option>
+                <option selected>At Condo</option>
+                <option>Picked Up</option>
+                <option>Returned</option>
+              </select>
+              <select>
+                <option>Today</option>
+                <option>This week</option>
+                <option>This month</option>
+              </select>
+              <input type="text" placeholder="Search..." />
+            </div>
+          </div>
+          <table>
+            <thead>
+            <tr>
+              <th>Tracking No.</th>
+              <th>Tenant</th>
+              <th>Unit</th>
+              <th>Status</th>
+              <th>Arrival</th>
+              <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>TH123456789</td>
+              <td>Somchai</td>
+              <td>B1205</td>
+              <td><span class="badge badge-green">At Condo</span></td>
+              <td>2025-11-18 10:45</td>
+              <td><button class="btn btn-outline btn-small" data-target="officer-detail">View</button></td>
+            </tr>
+            <tr>
+              <td>AB998877665</td>
+              <td>Alex</td>
+              <td>C604</td>
+              <td><span class="badge badge-gray">Picked Up</span></td>
+              <td>2025-11-17 09:20</td>
+              <td><button class="btn btn-outline btn-small" data-target="officer-detail">View</button></td>
+            </tr>
+            <tr>
+              <td>ZX554433221</td>
+              <td>Nina</td>
+              <td>A501</td>
+              <td><span class="badge badge-red">Returned</span></td>
+              <td>2025-11-12 14:15</td>
+              <td><button class="btn btn-outline btn-small" data-target="officer-detail">View</button></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Officer add package -->
+      <section id="officer-add" class="screen">
+        <div class="content-card">
+          <div class="content-header">
+            <h2>Add New Package</h2>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Tenant / Unit</label>
+              <select>
+                <option>Somchai – B1205</option>
+                <option>Alice – A903</option>
+                <option>Nina – A501</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Tracking Number</label>
+              <input type="text" placeholder="e.g. TH123456789" />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Courier</label>
+              <select>
+                <option>Kerry</option>
+                <option>Flash</option>
+                <option>Thailand Post</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Package Type</label>
+              <select>
+                <option>Small Parcel</option>
+                <option>Large Parcel</option>
+                <option>Document</option>
+                <option>Food</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Arrival Time</label>
+            <input type="text" value="2025-11-18 10:45 (auto)" disabled />
+          </div>
+
+          <div class="field">
+            <label>Notes</label>
+            <textarea placeholder="Optional notes, e.g. fragile, food, etc."></textarea>
+          </div>
+
+          <div style="margin-top:10px; display:flex; gap:8px;">
+            <button class="btn btn-primary">Save Package (demo)</button>
+            <button class="btn btn-outline" data-target="officer-dashboard">Cancel</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Officer package detail -->
+      <section id="officer-detail" class="screen">
+        <div class="content-card two-col">
+          <div>
+            <div class="info-block">
+              <h3>Tenant Info</h3>
+              <div class="info-row">
+                <span class="info-label">Name</span>
+                <span class="info-value">Somchai</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Unit</span>
+                <span class="info-value">B1205</span>
+              </div>
+            </div>
+
+            <div class="info-block">
+              <h3>Package Info</h3>
+              <div class="info-row">
+                <span class="info-label">Tracking No.</span>
+                <span class="info-value">TH123456789</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Courier</span>
+                <span class="info-value">Kerry</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Type</span>
+                <span class="info-value">Small Parcel</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Status</span>
+                <span class="info-value"><span class="badge badge-green">At Condo</span></span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Arrival</span>
+                <span class="info-value">2025-11-18 10:45</span>
+              </div>
+            </div>
+
+            <div class="info-block">
+              <h3>Notes</h3>
+              <p>Handle with care. Left at reception shelf A2.</p>
+            </div>
+          </div>
+
+          <div>
+            <div class="info-block">
+              <h3>Status Actions</h3>
+              <p>Update the package when the tenant picks it up or it is returned.</p>
+              <div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">
+                <button class="btn btn-primary btn-small">Mark as Picked Up</button>
+                <button class="btn btn-danger btn-small">Mark as Returned</button>
+                <button class="btn btn-outline btn-small" data-target="officer-add">Edit Package Info</button>
+              </div>
+            </div>
+            <div class="info-block">
+              <h3>History (demo)</h3>
+              <p>• 2025-11-18 10:45 – Package recorded by Officer Mint.</p>
+              <p>• Waiting for tenant pickup.</p>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-outline btn-small" data-target="officer-dashboard">
+          ← Back to Dashboard
+        </button>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- TENANT LAYOUT -->
+<div id="screen-tenant" class="app-shell screen">
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="side-top">
+        <h2>Tenant Panel</h2>
+        <small>Unit B1205</small>
+
+        <div class="nav-group">
+          <div class="nav-label">Navigation</div>
+          <button class="nav-btn active" data-target="tenant-dashboard">Dashboard</button>
+          <button class="nav-btn" data-target="tenant-history">Package History</button>
+        </div>
+      </div>
+      <div class="side-bottom">
+        <span>Logged in as <strong>Somchai</strong></span>
+        <button class="btn btn-outline btn-small" id="btn-back-login-2">Back to login</button>
+      </div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="topbar-main">
+          <h1 id="tenant-view-title">Dashboard</h1>
+          <span>Welcome, Somchai · Unit B1205</span>
+        </div>
+        <div class="topbar-right">
+          <span>Tenant</span>
+          <div class="avatar">S</div>
+        </div>
+      </div>
+
+      <section id="tenant-dashboard" class="screen active">
+        <div class="content-card">
+          <h2>Packages at Condo</h2>
+          <p style="margin-top:4px;">You currently have <strong>2</strong> packages waiting at reception.</p>
+
+          <table style="margin-top:12px;">
+            <thead>
+            <tr>
+              <th>Tracking No.</th>
+              <th>Courier</th>
+              <th>Arrival</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>TH123456789</td>
+              <td>Kerry</td>
+              <td>Today 10:45</td>
+              <td><span class="badge badge-green">At Condo</span></td>
+              <td><button class="btn btn-outline btn-small" data-target="tenant-detail">View</button></td>
+            </tr>
+            <tr>
+              <td>AA987654321</td>
+              <td>Flash</td>
+              <td>Today 09:30</td>
+              <td><span class="badge badge-green">At Condo</span></td>
+              <td><button class="btn btn-outline btn-small" data-target="tenant-detail">View</button></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="tenant-history" class="screen">
+        <div class="content-card">
+          <div class="content-header">
+            <h2>Package History</h2>
+            <div class="filters">
+              <select>
+                <option>All months</option>
+                <option selected>November 2025</option>
+              </select>
+            </div>
+          </div>
+          <table>
+            <thead>
+            <tr>
+              <th>Tracking No.</th>
+              <th>Status</th>
+              <th>Arrival</th>
+              <th>Pickup / Return</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>AB998877665</td>
+              <td><span class="badge badge-gray">Picked Up</span></td>
+              <td>2025-11-17 08:20</td>
+              <td>2025-11-17 09:00</td>
+            </tr>
+            <tr>
+              <td>GH445566778</td>
+              <td><span class="badge badge-red">Returned</span></td>
+              <td>2025-11-10 11:00</td>
+              <td>2025-11-15 14:20</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="tenant-detail" class="screen">
+        <div class="content-card two-col">
+          <div>
+            <div class="info-block">
+              <h3>Package Info</h3>
+              <div class="info-row">
+                <span class="info-label">Tracking No.</span>
+                <span class="info-value">TH123456789</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Courier</span>
+                <span class="info-value">Kerry</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Type</span>
+                <span class="info-value">Small Parcel</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Status</span>
+                <span class="info-value"><span class="badge badge-green">At Condo</span></span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Arrival</span>
+                <span class="info-value">Today 10:45</span>
+              </div>
+            </div>
+
+            <div class="info-block">
+              <h3>Pickup Instructions</h3>
+              <p>Please bring your condo key-card or ID to the reception desk.</p>
+            </div>
+          </div>
+          <div>
+            <div class="info-block">
+              <h3>Notes from Officer</h3>
+              <p>Handle with care. Stored at shelf A2 in lobby.</p>
+            </div>
+            <div class="info-block">
+              <h3>Contact</h3>
+              <p>Reception Desk · 1st Floor</p>
+              <p>Tel: 02-123-4567</p>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-outline btn-small" data-target="tenant-dashboard">
+          ← Back to Dashboard
+        </button>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- ADMIN LAYOUT -->
+<div id="screen-admin" class="app-shell screen">
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="side-top">
+        <h2>Admin Panel</h2>
+        <small>Building Management</small>
+
+        <div class="nav-group">
+          <div class="nav-label">Navigation</div>
+          <button class="nav-btn active" data-target="admin-dashboard">Dashboard</button>
+          <button class="nav-btn" data-target="admin-officers">Manage Officers</button>
+        </div>
+      </div>
+      <div class="side-bottom">
+        <span>Logged in as <strong>Admin</strong></span>
+        <button class="btn btn-outline btn-small" id="btn-back-login-3">Back to login</button>
+      </div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="topbar-main">
+          <h1 id="admin-view-title">Dashboard</h1>
+          <span>Condo B · Central Management</span>
+        </div>
+        <div class="topbar-right">
+          <span>Administrator</span>
+          <div class="avatar">A</div>
+        </div>
+      </div>
+
+      <section id="admin-dashboard" class="screen active">
+        <div class="content-card">
+          <div class="flex-row">
+            <div class="stat-card">
+              <span>Active Officers</span>
+              <strong>6</strong>
+            </div>
+            <div class="stat-card">
+              <span>Total Packages (Month)</span>
+              <strong>125</strong>
+            </div>
+            <div class="stat-card">
+              <span>Pickup Rate</span>
+              <strong>92%</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-card">
+          <h2>Overview (demo)</h2>
+          <p style="margin-top:6px;">
+            This area could later display charts about package flow, pickup times,
+            and frequently used couriers.
+          </p>
+        </div>
+      </section>
+
+      <section id="admin-officers" class="screen">
+        <div class="content-card">
+          <div class="content-header">
+            <h2>Manage Officers</h2>
+            <button class="btn btn-primary btn-small">+ Add Officer (demo)</button>
+          </div>
+          <table>
+            <thead>
+            <tr>
+              <th>Name</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>Mint Chai</td>
+              <td>mintc</td>
+              <td>Officer</td>
+              <td><span class="badge badge-green">Active</span></td>
+              <td><button class="btn btn-outline btn-small">Edit</button></td>
+            </tr>
+            <tr>
+              <td>Tawan Y.</td>
+              <td>tawan02</td>
+              <td>Admin</td>
+              <td><span class="badge badge-green">Active</span></td>
+              <td><button class="btn btn-outline btn-small">Edit</button></td>
+            </tr>
+            <tr>
+              <td>Nina S.</td>
+              <td>nina_s</td>
+              <td>Officer</td>
+              <td><span class="badge badge-gray">Inactive</span></td>
+              <td><button class="btn btn-outline btn-small">Edit</button></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+  // Helper to switch high-level screen (login / officer / tenant / admin)
+  function showRootScreen(id) {
+    document.querySelectorAll('.app-shell').forEach(el => {
+      el.classList.remove('active');
+    });
+    document.getElementById(id).classList.add('active');
+  }
+
+  // Demo login role buttons
+  document.querySelectorAll('[data-demo-role]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const role = btn.getAttribute('data-demo-role');
+      if (role === 'officer') showRootScreen('screen-officer');
+      if (role === 'tenant') showRootScreen('screen-tenant');
+      if (role === 'admin') showRootScreen('screen-admin');
+    });
+  });
+
+  // Back to login buttons
+  document.getElementById('btn-back-login-1').addEventListener('click', () => {
+    showRootScreen('screen-login');
+  });
+  document.getElementById('btn-back-login-2').addEventListener('click', () => {
+    showRootScreen('screen-login');
+  });
+  document.getElementById('btn-back-login-3').addEventListener('click', () => {
+    showRootScreen('screen-login');
+  });
+
+  // Sidebar navigation inside each role layout
+  function setupSectionNav(containerId, titlePrefix) {
+    const container = document.getElementById(containerId);
+    const navButtons = container.querySelectorAll('.nav-btn');
+    const screens = container.querySelectorAll('main .screen');
+    const titleEl = container.querySelector('.topbar-main h1');
+
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-target');
+
+        // button active state
+        navButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // show only target section
+        screens.forEach(sc => sc.classList.remove('active'));
+        const section = container.querySelector('#' + target);
+        if (section) section.classList.add('active');
+
+        // update top title text (nice for reference)
+        if (titleEl) {
+          const text = btn.textContent.trim();
+          titleEl.textContent = text || titlePrefix;
+        }
+      });
+    });
+
+    // Also allow buttons with data-target inside content (e.g. View / Cancel)
+    container.querySelectorAll('[data-target]').forEach(el => {
+      el.addEventListener('click', () => {
+        const target = el.getAttribute('data-target');
+        const section = container.querySelector('#' + target);
+        if (!section) return;
+
+        screens.forEach(sc => sc.classList.remove('active'));
+        section.classList.add('active');
+
+        // highlight corresponding nav if it exists
+        navButtons.forEach(b => {
+          if (b.getAttribute('data-target') === target) {
+            navButtons.forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            if (titleEl) titleEl.textContent = b.textContent.trim();
+          }
+        });
+      });
+    });
+  }
+
+  setupSectionNav('screen-officer', 'Dashboard');
+  setupSectionNav('screen-tenant', 'Dashboard');
+  setupSectionNav('screen-admin', 'Dashboard');
+</script>
+
+</body>
+</html>
