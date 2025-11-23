@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Condo Delivery Management Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-card: #020617;
+      --bg-soft: #111827;
+      --border-subtle: #1f2937;
+      --accent: #3b82f6;
+      --accent-soft: rgba(59, 130, 246, 0.15);
+      --accent-strong: #2563eb;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --danger: #ef4444;
+      --danger-soft: rgba(239, 68, 68, 0.15);
+      --success: #22c55e;
+      --success-soft: rgba(34, 197, 94, 0.15);
+      --radius-lg: 18px;
+      --radius-xl: 24px;
+      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.65);
+      --shadow-elevated: 0 20px 60px rgba(15, 23, 42, 0.9);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1d2438 0, #020617 52%, #000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+    }
+
+    /* Top-level screens */
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 1200px;
+      margin: 24px;
+      border-radius: var(--radius-xl);
+      background: linear-gradient(145deg, #020617 0, #020617 40%, #020617 60%, #020617 100%);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Layout for app shells (officer/admin/tenant) */
+    .app-shell .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      width: 100%;
+      min-height: 640px;
+    }
+
+    .sidebar {
+      background: radial-gradient(circle at top left, #111827 0, #020617 60%);
+      border-right: 1px solid rgba(148, 163, 184, 0.15);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px 18px 18px;
+    }
+
+    .sidebar h2 {
+      font-size: 1.15rem;
+      margin: 0;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .sidebar small {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .side-top {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .nav-group {
+      margin-top: 4px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(31, 41, 55, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-label {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .nav-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      padding: 7px 10px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: 0.16s ease all;
+    }
+
+    .nav-btn:hover {
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+    }
+
+    .nav-btn.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.6);
+    }
+
+    .side-bottom {
+      border-top: 1px solid rgba(31, 41, 55, 0.9);
+      padding-top: 12px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    main {
+      background: radial-gradient(circle at top right, #111827 0, #020617 60%);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 22px 14px;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.8);
+      backdrop-filter: blur(20px);
+      background: linear-gradient(to bottom, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.85));
+    }
+
+    .topbar-main h1 {
+      font-size: 1.15rem;
+      margin: 0;
+    }
+
+    .topbar-main span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-right span {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 0, #38bdf8, #4f46e5);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.85rem;
+      box-shadow: 0 0 0 2px #020617;
+    }
+
+    /* Subscreens inside each app-shell main */
+    .subscreen {
+      display: none;
+      padding: 18px 20px 20px;
+      overflow-y: auto;
+      max-height: calc(100vh - 120px);
+    }
+
+    .subscreen.active {
+      display: block;
+    }
+
+    .content-card {
+      background: radial-gradient(circle at top, #020617 0, #020617 45%, #020617 100%);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      padding: 14px 14px 16px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.7);
+      margin-bottom: 14px;
+    }
+
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .content-header h2 {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .flex-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .stat-card {
+      flex: 1;
+      min-width: 150px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      background: radial-gradient(circle at top left, #111827 0, #020617 60%);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.7);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-card strong {
+      font-size: 1.3rem;
+      color: var(--text-main);
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .filters input,
+    .filters select {
+      background: #020617;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      min-width: 150px;
+    }
+
+    .filters input::placeholder {
+      color: #6b7280;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    thead {
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    th,
+    td {
+      padding: 7px 8px;
+      text-align: left;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+    }
+
+    th {
+      font-weight: 500;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    tbody tr:hover {
+      background: rgba(15, 23, 42, 0.8);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 0.7rem;
+      border: 1px solid transparent;
+    }
+
+    .badge-green {
+      color: var(--success);
+      background: var(--success-soft);
+      border-color: rgba(34, 197, 94, 0.6);
+    }
+
+    .badge-gray {
+      color: #9ca3af;
+      background: rgba(148, 163, 184, 0.08);
+      border-color: rgba(148, 163, 184, 0.5);
+    }
+
+    .badge-red {
+      color: var(--danger);
+      background: var(--danger-soft);
+      border-color: rgba(239, 68, 68, 0.7);
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: none;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: 0.16s ease all;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(120deg, var(--accent-strong), #06b6d4);
+      color: white;
+      box-shadow: 0 12px 30px rgba(37, 99, 235, 0.5);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+      box-shadow: 0 16px 40px rgba(37, 99, 235, 0.7);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      color: var(--text-muted);
+    }
+
+    .btn-outline:hover {
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+    }
+
+    .btn-small {
+      padding: 4px 10px;
+      font-size: 0.75rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 8px;
+      flex: 1;
+      min-width: 150px;
+      font-size: 0.8rem;
+    }
+
+    .field-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .field label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      background: #020617;
+      border-radius: 12px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      padding: 7px 10px;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      min-height: 32px;
+    }
+
+    .field textarea {
+      min-height: 60px;
+      resize: vertical;
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder {
+      color: #6b7280;
+    }
+
+    /* LOGIN SCREEN */
+    #screen-login {
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 55%, #020617 100%);
+    }
+
+    .login-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      width: 100%;
+    }
+
+    .login-left {
+      padding: 26px 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-right: 1px solid rgba(15, 23, 42, 0.9);
+      background: radial-gradient(circle at top left, #111827 0, #020617 70%);
+    }
+
+    .login-title {
+      margin-bottom: 20px;
+    }
+
+    .login-title h1 {
+      margin: 0 0 4px;
+      font-size: 1.4rem;
+      letter-spacing: 0.02em;
+    }
+
+    .login-title p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .login-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+      font-size: 0.75rem;
+    }
+
+    .pill {
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      color: var(--text-muted);
+    }
+
+    .login-right {
+      padding: 24px 26px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .role-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .role-card {
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      padding: 10px 10px 12px;
+      background: radial-gradient(circle at top, #020617 0, #020617 70%);
+      cursor: pointer;
+      transition: 0.15s ease all;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.7);
+    }
+
+    .role-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(59, 130, 246, 0.6);
+      box-shadow: 0 16px 40px rgba(37, 99, 235, 0.6);
+    }
+
+    .role-card h3 {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .role-card p {
+      margin: 0;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .role-tag {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      align-self: flex-start;
+      color: var(--text-muted);
+    }
+
+    .login-creds {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      border-radius: 12px;
+      border: 1px dashed rgba(148, 163, 184, 0.4);
+      padding: 8px 10px;
+    }
+
+    .login-creds code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
+      font-size: 0.75rem;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 2px 4px;
+      border-radius: 4px;
+      color: #e5e7eb;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 960px) {
+      .screen {
+        margin: 10px;
+      }
+      .login-shell {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .login-left {
+        display: none;
+      }
+      .app-shell .layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- LOGIN SCREEN -->
+  <div id="screen-login" class="screen active">
+    <div class="login-shell">
+      <div class="login-left">
+        <div>
+          <div class="login-title">
+            <h1>Condo Delivery Center</h1>
+            <p>Package tracking system for tenants, officers, and admin.</p>
+          </div>
+          <div class="login-badges">
+            <span class="pill">Role-based access</span>
+            <span class="pill">Room-based package lookup</span>
+            <span class="pill">Audit-friendly design</span>
+          </div>
+        </div>
+        <div style="font-size:0.78rem; color:var(--text-muted); margin-top:18px;">
+          <div>For your DB term project: this UI can be used as the “wireframe &amp; mock app” for
+            proposal and later presentations.</div>
+        </div>
+      </div>
+      <div class="login-right">
+        <div>
+          <h2 style="margin:0 0 4px; font-size:1.1rem;">Choose a role to preview</h2>
+          <p style="margin:0; font-size:0.8rem; color:var(--text-muted);">
+            No real login. Click any role card to open that interface.
+          </p>
+        </div>
+        <div class="role-grid">
+          <button class="role-card" data-role="tenant">
+            <div class="role-tag">Tenant</div>
+            <h3>Resident / Tenant</h3>
+            <p>Check your incoming packages and pickup history for your room.</p>
+          </button>
+          <button class="role-card" data-role="officer">
+            <div class="role-tag">Officer</div>
+            <h3>Front Desk Officer</h3>
+            <p>Record arriving packages and mark them as picked up or returned.</p>
+          </button>
+          <button class="role-card" data-role="admin">
+            <div class="role-tag">Admin</div>
+            <h3>Building Admin</h3>
+            <p>Oversee officers, rooms, tenants, and view all package records.</p>
+          </button>
+        </div>
+        <div class="login-creds">
+          <div style="margin-bottom:4px;">Suggested demo credentials (for slides / docs only):</div>
+          <div>Officer: <code>officer01 / ••••••</code> · Admin: <code>admin01 / ••••••</code></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TENANT LAYOUT -->
+  <div id="screen-tenant" class="screen app-shell">
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="side-top">
+          <div>
+            <h2>Tenant</h2>
+            <small>Room B1205 · Somchai</small>
+          </div>
+          <div class="nav-group">
+            <div class="nav-label">Navigation</div>
+            <button class="nav-btn active" data-target="tenant-dashboard">Dashboard</button>
+            <button class="nav-btn" data-target="tenant-packages">My Packages</button>
+            <button class="nav-btn" data-target="tenant-profile">Profile</button>
+          </div>
+        </div>
+        <div class="side-bottom">
+          <span>Logged in as <strong>Tenant</strong></span>
+          <button class="btn btn-outline btn-small back-to-login">Back to role selection</button>
+        </div>
+      </aside>
+      <main>
+        <div class="topbar">
+          <div class="topbar-main">
+            <h1>Tenant View</h1>
+            <span>Check your deliveries and pickup history.</span>
+          </div>
+          <div class="topbar-right">
+            <span>B1205 · Somchai</span>
+            <div class="avatar">S</div>
+          </div>
+        </div>
+
+        <!-- Tenant Dashboard -->
+        <section id="tenant-dashboard" class="subscreen active">
+          <div class="content-card">
+            <div class="flex-row">
+              <div class="stat-card">
+                <span>Packages waiting at counter</span>
+                <strong>2</strong>
+              </div>
+              <div class="stat-card">
+                <span>Picked up this month</span>
+                <strong>5</strong>
+              </div>
+              <div class="stat-card">
+                <span>Returned to sender</span>
+                <strong>1</strong>
+              </div>
+            </div>
+          </div>
+          <div class="content-card">
+            <div class="content-header">
+              <h2>Latest waiting packages</h2>
+            </div>
+            <table>
+              <thead>
+              <tr>
+                <th>Tracking No.</th>
+                <th>Courier</th>
+                <th>Status</th>
+                <th>Arrived</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>TH123456789</td>
+                <td>Kerry</td>
+                <td><span class="badge badge-green">At Condo</span></td>
+                <td>Nov 18, 10:45</td>
+              </tr>
+              <tr>
+                <td>AB998877665</td>
+                <td>Flash</td>
+                <td><span class="badge badge-green">At Condo</span></td>
+                <td>Nov 17, 18:20</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Tenant packages list -->
+        <section id="tenant-packages" class="subscreen">
+          <div class="content-card">
+            <div class="content-header">
+              <h2>My Package History (Room B1205)</h2>
+              <div class="filters">
+                <select>
+                  <option>All statuses</option>
+                  <option selected>At Condo</option>
+                  <option>Picked Up</option>
+                  <option>Returned</option>
+                </select>
+                <input type="date" />
+                <input type="text" placeholder="Search tracking number" />
+              </div>
+            </div>
+            <table>
+              <thead>
+              <tr>
+                <th>Tracking No.</th>
+                <th>Status</th>
+                <th>Arrived</th>
+                <th>Picked up / Returned</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>TH123456789</td>
+                <td><span class="badge badge-green">At Condo</span></td>
+                <td>Nov 18, 10:45</td>
+                <td>–</td>
+              </tr>
+              <tr>
+                <td>AA112233445</td>
+                <td><span class="badge badge-gray">Picked Up</span></td>
+                <td>Nov 10, 16:05</td>
+                <td>Nov 10, 18:15</td>
+              </tr>
+              <tr>
+                <td>ZX009988776</td>
+                <td><span class="badge badge-red">Returned</span></td>
+                <td>Oct 12, 09:42</td>
+                <td>Oct 19, Returned</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Tenant profile -->
+        <section id="tenant-profile" class="subscreen">
+          <div class="content-card">
+            <div class="content-header">
+              <h2>Profile &amp; Room Info</h2>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Tenant Name</label>
+                <input type="text" value="Somchai" />
+              </div>
+              <div class="field">
+                <label>Room / Unit</label>
+                <input type="text" value="B1205" />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Phone</label>
+                <input type="text" value="089-123-4567" />
+              </div>
+              <div class="field">
+                <label>Email</label>
+                <input type="email" value="somchai@example.com" />
+              </div>
+            </div>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">
+              In the real system, these fields would be readonly or editable based on your design. For
+              now they are only for demonstration.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- OFFICER LAYOUT -->
+  <div id="screen-officer" class="screen app-shell">
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="side-top">
+          <div>
+            <h2>Officer Desk</h2>
+            <small>Lobby Counter · Condo B</small>
+          </div>
+          <div class="nav-group">
+            <div class="nav-label">Navigation</div>
+            <button class="nav-btn active" data-target="officer-dashboard">Dashboard</button>
+            <button class="nav-btn" data-target="officer-add">Add Package</button>
+            <button class="nav-btn" data-target="officer-packages">Package List</button>
+          </div>
+        </div>
+        <div class="side-bottom">
+          <span>Logged in as <strong>Officer</strong></span>
+          <button class="btn btn-outline btn-small back-to-login">Back to role selection</button>
+        </div>
+      </aside>
+      <main>
+        <div class="topbar">
+          <div class="topbar-main">
+            <h1>Officer View</h1>
+            <span>Register new packages and manage pickups.</span>
+          </div>
+          <div class="topbar-right">
+            <span>Mint · Shift A</span>
+            <div class="avatar">M</div>
+          </div>
+        </div>
+
+        <!-- Officer Dashboard -->
+        <section id="officer-dashboard" class="subscreen active">
+          <div class="content-card">
+            <div class="flex-row">
+              <div class="stat-card">
+                <span>Packages at condo</span>
+                <strong>7</strong>
+              </div>
+              <div class="stat-card">
+                <span>Picked up today</span>
+                <strong>12</strong>
+              </div>
+              <div class="stat-card">
+                <span>Returned this month</span>
+                <strong>3</strong>
+              </div>
+            </div>
+          </div>
+          <div class="content-card">
+            <div class="content-header">
+              <h2>Today’s Packages</h2>
+              <div class="filters">
+                <select>
+                  <option>All statuses</option>
+                  <option selected>At Condo</option>
+                  <option>Picked Up</option>
+                  <option>Returned</option>
+                </select>
+                <input type="date" />
+                <input type="text" placeholder="Filter by unit (e.g. B1205)" />
+                <input type="text" placeholder="Search tracking or tenant" />
+              </div>
+            </div>
+            <table>
+              <thead>
+              <tr>
+                <th>Tracking No.</th>
+                <th>Tenant</th>
+                <th>Unit</th>
+                <th>Status</th>
+                <th>Arrival</th>
+                <th></th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>TH123456789</td>
+                <td>Somchai</td>
+                <td>B1205</td>
+                <td><span class="badge badge-green">At Condo</span></td>
+                <td>10:45</td>
+                <td><button class="btn btn-outline btn-small" data-target="officer-detail">View</button></td>
+              </tr>
+              <tr>
+                <td>AA112233445</td>
+                <td>Alice</td>
+                <td>A903</td>
+                <td><span class="badge badge-green">At Condo</span></td>
+                <td>09:30</td>
+                <td><button class="btn btn-outline btn-small" data-target="officer-detail">View</button></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Officer Add Package -->
+        <section id="officer-add" class="subscreen">
+          <div class="content-card">
+            <div class="content-header">
+              <h2>Register New Package</h2>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Tracking Number</label>
+                <input type="text" placeholder="e.g. TH123456789" />
+              </div>
+              <div class="field">
+                <label>Courier</label>
+                <select>
+                  <option>Kerry</option>
+                  <option>Flash</option>
+                  <option>Thailand Post</option>
+                  <option>Lazada Express</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Tenant Name</label>
+                <input type="text" placeholder="e.g. Somchai" />
+              </div>
+              <div class="field">
+                <label>Unit / Room</label>
+                <input type="text" placeholder="e.g. B1205" />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Arrival Date/Time</label>
+                <input type="datetime-local" />
+              </div>
+              <div class="field">
+                <label>Status</label>
+                <select>
+                  <option>At Condo</option>
+                  <option>Picked Up</option>
+                  <option>Returned</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label>Officer Note</label>
+              <textarea placeholder="Add any special notes (fragile, COD, etc)."></textarea>
+            </div>
+            <div style="margin-top:10px; display:flex; gap:8px;">
+              <button class="btn btn-primary btn-small">Save (demo only)</button>
+              <button class="btn btn-outline btn-small" data-target="officer-dashboard">Cancel</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Officer package list -->
+        <section id="officer-packages" class="subscreen">
+          <div class="content-card">
+            <div class="content-header">
+              <h2>Package List</h2>
+              <div class="filters">
+                <select>
+                  <option>All statuses</option>
+                  <option selected>At Condo</option>
+                  <option>Picked Up</option>
+                  <option>Returned</option>
+                </select>
+                <input type="date" />
+                <input type="text" placeholder="Filter by unit (e.g. B1205)" />
+                <input type="text" placeholder="Search tracking / tenant" />
+              </div>
+            </div>
+            <table>
+              <thead>
+              <tr>
+                <th>Tracking No.</th>
+                <th>Tenant</th>
+                <th>Unit</th>
+                <th>Status</th>
+                <th>Arrival</th>
+                <th></th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>TH123456789</td>
+                <td>Somchai</td>
+                <td>B1205</td>
+                <td><span class="badge badge-green">At Condo</span></td>
+                <td>2025-11-18 10:45</td>
+                <td><button class="btn btn-outline btn-small" data-target="officer-detail">View</button></td>
+              </tr>
+              <tr>
+                <td>AB998877665</td>
+                <td>Alex</td>
+                <td>C604</td>
+                <td><span class="badge badge-gray">Picked Up</span></td>
+                <td>2025-11-17 09:20</td>
+                <td><button class="btn btn-outline btn-small" data-target="officer-detail">View</button></td>
+              </tr>
+              <tr>
+                <td>ZX554433221</td>
+                <td>Nina</td>
+                <td>A501</td>
+                <td><span class="badge badge-red">Returned</span></td>
+                <td>2025-11-12 14:15</td>
+                <td><button class="btn btn-outline btn-small" data-target="officer-detail">View</button></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Officer Package Detail -->
+        <section id="officer-detail" class="subscreen">
+          <div class="content-card">
+            <div class="content-header">
+              <h2>Package Detail (Demo)</h2>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Tracking Number</label>
+                <input type="text" value="TH123456789" />
+              </div>
+              <div class="field">
+                <label>Courier</label>
+                <input type="text" value="Kerry" />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Tenant Name</label>
+                <input type="text" value="Somchai" />
+              </div>
+              <div class="field">
+                <label>Unit / Room</label>
+                <input type="text" value="B1205" />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Status</label>
+                <select>
+                  <option selected>At Condo</option>
+                  <option>Picked Up</option>
+                  <option>Returned</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Arrived At</label>
+                <input type="text" value="2025-11-18 10:45" />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Pickup / Return Time</label>
+                <input type="text" placeholder="Not picked up yet" />
+              </div>
+              <div class="field">
+                <label>Handled By (Officer)</label>
+                <input type="text" value="Mint" />
+              </div>
+            </div>
+            <div class="field">
+              <label>Notes</label>
+              <textarea>Fragile · keep at front shelf.</textarea>
+            </div>
+            <div style="margin-top:10px; display:flex; gap:8px;">
+              <button class="btn btn-primary btn-small">Update (demo only)</button>
+              <button class="btn btn-outline btn-small" data-target="officer-packages">Back to list</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- ADMIN LAYOUT -->
+  <div id="screen-admin" class="screen app-shell">
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="side-top">
+          <div>
+            <h2>Admin Panel</h2>
+            <small>Building Management</small>
+          </div>
+          <div class="nav-group">
+            <div class="nav-label">Navigation</div>
+            <button class="nav-btn active" data-target="admin-dashboard">Dashboard</button>
+            <button class="nav-btn" data-target="admin-packages">Packages</button>
+            <button class="nav-btn" data-target="admin-officers">Officers</button>
+            <button class="nav-btn" data-target="admin-rooms">Rooms / Units</button>
+            <button class="nav-btn" data-target="admin-tenants">Tenants</button>
+          </div>
+        </div>
+        <div class="side-bottom">
+          <span>Logged in as <strong>Admin</strong></span>
+          <button class="btn btn-outline btn-small back-to-login">Back to role selection</button>
+        </div>
+      </aside>
+      <main>
+        <div class="topbar">
+          <div class="topbar-main">
+            <h1 id="admin-view-title">Dashboard</h1>
+            <span>Monitors officers, units, tenants and packages.</span>
+          </div>
+          <div class="topbar-right">
+            <span>Administrator</span>
+            <div class="avatar">A</div>
+          </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <section id="admin-dashboard" class="subscreen active">
+          <div class="content-card">
+            <div class="flex-row">
+              <div class="stat-card">
+                <span>Active Officers</span>
+                <strong>6</strong>
+              </div>
+              <div class="stat-card">
+                <span>Units (Total)</span>
+                <strong>220</strong>
+              </div>
+              <div class="stat-card">
+                <span>Tenants Registered</span>
+                <strong>180</strong>
+              </div>
+            </div>
+          </div>
+          <div class="content-card">
+            <h2>Overview</h2>
+            <p style="margin-top:6px; font-size:0.8rem; color:var(--text-muted);">
+              This panel is a read-only mockup for your database design. The Admin sees an overview and
+              can manage master data (officers, rooms, tenants) while packages are read-only here.
+            </p>
+          </div>
+        </section>
+
+        <!-- Admin Packages (read-only) -->
+        <section id="admin-packages" class="subscreen">
+          <div class="content-card">
+            <div class="content-header">
+              <h2>All Packages (Read Only)</h2>
+              <div class="filters">
+                <select>
+                  <option>All statuses</option>
+                  <option>At Condo</option>
+                  <option>Picked Up</option>
+                  <option>Returned</option>
+                </select>
+                <input type="date" />
+                <input type="text" placeholder="Filter by unit (e.g. B1205)" />
+                <input type="text" placeholder="Search tracking / tenant" />
+              </div>
+            </div>
+            <table>
+              <thead>
+              <tr>
+                <th>Tracking No.</th>
+                <th>Tenant</th>
+                <th>Unit</th>
+                <th>Status</th>
+                <th>Arrival</th>
+                <th>Pickup / Return</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>TH123456789</td>
+                <td>Somchai</td>
+                <td>B1205</td>
+                <td><span class="badge badge-green">At Condo</span></td>
+                <td>2025-11-18 10:45</td>
+                <td>–</td>
+              </tr>
+              <tr>
+                <td>AB998877665</td>
+                <td>Alex</td>
+                <td>C604</td>
+                <td><span class="badge badge-gray">Picked Up</span></td>
+                <td>2025-11-17 09:20</td>
+                <td>2025-11-17 09:55</td>
+              </tr>
+              <tr>
+                <td>ZX554433221</td>
+                <td>Nina</td>
+                <td>A501</td>
+                <td><span class="badge badge-red">Returned</span></td>
+                <td>2025-11-12 14:15</td>
+                <td>2025-11-19 15:02 (Returned)</td>
+              </tr>
+              </tbody>
+            </table>
+            <p style="margin-top:8px; font-size:0.8rem; color:var(--text-muted);">
+              Admin cannot edit packages here; all changes must go through the Officer workflow. This
+              clearly separates operational role (Officer) from oversight/reporting role (Admin).
+            </p>
+          </div>
+        </section>
+
+        <!-- Admin Officers list -->
+        <section id="admin-officers" class="subscreen">
+          <div class="content-card">
+            <div class="content-header">
+              <h2>Officers</h2>
+              <button class="btn btn-primary btn-small" data-target="admin-officer-form">
+                + Add Officer
+              </button>
+            </div>
+            <table>
+              <thead>
+              <tr>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>Mint Chai</td>
+                <td>mintc</td>
+                <td>Officer</td>
+                <td><span class="badge badge-green">Active</span></td>
+                <td><button class="btn btn-outline btn-small" data-target="admin-officer-form">Edit</button></td>
+              </tr>
+              <tr>
+                <td>Tawan Y.</td>
+                <td>tawan02</td>
+                <td>Admin</td>
+                <td><span class="badge badge-green">Active</span></td>
+                <td><button class="btn btn-outline btn-small" data-target="admin-officer-form">Edit</button></td>
+              </tr>
+              <tr>
+                <td>Nina S.</td>
+                <td>nina_s</td>
+                <td>Officer</td>
+                <td><span class="badge badge-gray">Inactive</span></td>
+                <td><button class="btn btn-outline btn-small" data-target="admin-officer-form">Edit</button></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Admin Officer form -->
+        <section id="admin-officer-form" class="subscreen">
+          <div class="content-card">
+            <div class="content-header">
+              <h2>Add / Edit Officer</h2>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Full Name</label>
+                <input type="text" placeholder="e.g. Mint Chai" />
+              </div>
+              <div class="field">
+                <label>Username</label>
+                <input type="text" placeholder="e.g. mintc" />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Password (demo only)</label>
+                <input type="password" placeholder="••••••••" />
+              </div>
+              <div class="field">
+                <label>Role</label>
+                <select>
+                  <option>Officer</option>
+                  <option>Admin</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label>Status</label>
+              <select>
+                <option>Active</option>
+                <option>Inactive</option>
+              </select>
+            </div>
+            <div style="margin-top:10px; display:flex; gap:8px;">
+              <button class="btn btn-primary btn-small">Save (demo)</button>
+              <button class="btn btn-outline btn-small" data-target="admin-officers">Cancel</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Admin Rooms / Units list -->
+        <section id="admin-rooms" class="subscreen">
+          <div class="content-card">
+            <div class="content-header">
+              <h2>Rooms / Units</h2>
+              <button class="btn btn-primary btn-small" data-target="admin-room-form">
+                + Add Unit
+              </button>
+            </div>
+            <table>
+              <thead>
+              <tr>
+                <th>Unit</th>
+                <th>Building</th>
+                <th>Floor</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>B1205</td>
+                <td>B</td>
+                <td>12</td>
+                <td><span class="badge badge-green">Occupied</span></td>
+                <td><button class="btn btn-outline btn-small" data-target="admin-room-form">Edit</button></td>
+              </tr>
+              <tr>
+                <td>A903</td>
+                <td>A</td>
+                <td>9</td>
+                <td><span class="badge badge-green">Occupied</span></td>
+                <td><button class="btn btn-outline btn-small" data-target="admin-room-form">Edit</button></td>
+              </tr>
+              <tr>
+                <td>C204</td>
+                <td>C</td>
+                <td>2</td>
+                <td><span class="badge badge-gray">Empty</span></td>
+                <td><button class="btn btn-outline btn-small" data-target="admin-room-form">Edit</button></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Admin Room / Unit form -->
+        <section id="admin-room-form" class="subscreen">
+          <div class="content-card">
+            <div class="content-header">
+              <h2>Add / Edit Room / Unit</h2>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Building</label>
+                <select>
+                  <option>A</option>
+                  <option>B</option>
+                  <option>C</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Unit Number</label>
+                <input type="text" placeholder="e.g. B1205" />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Floor</label>
+                <input type="number" placeholder="e.g. 12" />
+              </div>
+              <div class="field">
+                <label>Status</label>
+                <select>
+                  <option>Occupied</option>
+                  <option>Empty</option>
+                  <option>Maintenance</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label>Notes</label>
+              <textarea placeholder="Optional notes about this unit."></textarea>
+            </div>
+            <div style="margin-top:10px; display:flex; gap:8px;">
+              <button class="btn btn-primary btn-small">Save (demo)</button>
+              <button class="btn btn-outline btn-small" data-target="admin-rooms">Cancel</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Admin Tenants list -->
+        <section id="admin-tenants" class="subscreen">
+          <div class="content-card">
+            <div class="content-header">
+              <h2>Tenants</h2>
+              <button class="btn btn-primary btn-small" data-target="admin-tenant-form">
+                + Add Tenant
+              </button>
+            </div>
+            <table>
+              <thead>
+              <tr>
+                <th>Name</th>
+                <th>Unit</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>Somchai</td>
+                <td>B1205</td>
+                <td>089-123-4567</td>
+                <td>somchai@example.com</td>
+                <td><span class="badge badge-green">Active</span></td>
+                <td><button class="btn btn-outline btn-small" data-target="admin-tenant-form">Edit</button></td>
+              </tr>
+              <tr>
+                <td>Alice</td>
+                <td>A903</td>
+                <td>081-222-3344</td>
+                <td>alice@example.com</td>
+                <td><span class="badge badge-green">Active</span></td>
+                <td><button class="btn btn-outline btn-small" data-target="admin-tenant-form">Edit</button></td>
+              </tr>
+              <tr>
+                <td>(empty)</td>
+                <td>C204</td>
+                <td>-</td>
+                <td>-</td>
+                <td><span class="badge badge-gray">No Tenant</span></td>
+                <td><button class="btn btn-outline btn-small" data-target="admin-tenant-form">Add</button></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Admin Tenant form -->
+        <section id="admin-tenant-form" class="subscreen">
+          <div class="content-card">
+            <div class="content-header">
+              <h2>Add / Edit Tenant</h2>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Unit</label>
+                <select>
+                  <option>B1205</option>
+                  <option>A903</option>
+                  <option>C204</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Tenant Name</label>
+                <input type="text" placeholder="e.g. Somchai" />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Phone</label>
+                <input type="text" placeholder="e.g. 089-123-4567" />
+              </div>
+              <div class="field">
+                <label>Email</label>
+                <input type="email" placeholder="e.g. somchai@example.com" />
+              </div>
+            </div>
+            <div class="field">
+              <label>Status</label>
+              <select>
+                <option>Active</option>
+                <option>Moved Out</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Notes</label>
+              <textarea placeholder="Optional notes about this tenant."></textarea>
+            </div>
+            <div style="margin-top:10px; display:flex; gap:8px;">
+              <button class="btn btn-primary btn-small">Save (demo)</button>
+              <button class="btn btn-outline btn-small" data-target="admin-tenants">Cancel</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const topScreens = document.querySelectorAll(".screen");
+
+      function showTopScreen(id) {
+        topScreens.forEach((s) => {
+          if (s.id === id) {
+            s.classList.add("active");
+          } else {
+            s.classList.remove("active");
+          }
+        });
+      }
+
+      // Role selection from login
+      document.querySelectorAll(".role-card[data-role]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const role = btn.getAttribute("data-role");
+          showTopScreen("screen-" + role);
+        });
+      });
+
+      // Back to login buttons
+      document.querySelectorAll(".back-to-login").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          showTopScreen("screen-login");
+        });
+      });
+
+      // Generic sidebar navigation for each app-shell
+      document.querySelectorAll(".app-shell").forEach((shell) => {
+        const main = shell.querySelector("main");
+        const subscreens = main.querySelectorAll(".subscreen");
+        const navButtons = shell.querySelectorAll(".nav-btn");
+
+        function activateSubscreen(targetId) {
+          subscreens.forEach((sec) => {
+            sec.classList.toggle("active", sec.id === targetId);
+          });
+          navButtons.forEach((btn) => {
+            const t = btn.getAttribute("data-target");
+            if (t === targetId) {
+              btn.classList.add("active");
+            } else if (navButtons.length) {
+              btn.classList.remove("active");
+            }
+          });
+          // Update admin title if in admin panel
+          if (shell.id === "screen-admin") {
+            const title = document.getElementById("admin-view-title");
+            if (title) {
+              const map = {
+                "admin-dashboard": "Dashboard",
+                "admin-packages": "Packages",
+                "admin-officers": "Officers",
+                "admin-officer-form": "Officer Form",
+                "admin-rooms": "Rooms / Units",
+                "admin-room-form": "Room / Unit Form",
+                "admin-tenants": "Tenants",
+                "admin-tenant-form": "Tenant Form",
+              };
+              title.textContent = map[targetId] || "Admin Panel";
+            }
+          }
+        }
+
+        navButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const targetId = btn.getAttribute("data-target");
+            activateSubscreen(targetId);
+          });
+        });
+
+        // Any button inside main that has data-target should also switch subscreens
+        main.addEventListener("click", (e) => {
+          const btn = e.target.closest("button[data-target]");
+          if (!btn) return;
+          const targetId = btn.getAttribute("data-target");
+          if (targetId) {
+            activateSubscreen(targetId);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
